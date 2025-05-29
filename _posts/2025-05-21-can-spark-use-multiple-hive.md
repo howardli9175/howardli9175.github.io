@@ -11,13 +11,14 @@ tags: [spark, hive]
 
 但是从3.0.0开始，Spark增加了CatalogPlugin接口，支持通过CatalogManager管理多个CatalogPlugin，让spark同时访问多个hive有了理论上可能性。
 
-Catalog起什么作用？
+## 1、Catalog起什么作用？
 
 一个重要作用就是被Analyzer使用，把UnresolvedRelation变成ResolvedRelation，例如，当Analyzer看到一个my_db.my_table名字时，它需要清楚这个名字对应什么数据，是否存在。
 ![behind_spark_sql](/images/behind_spark_sql.png)
 
 spark中，Catalog的实现一直在演进。
 
+## 2、spark2.0中的Catalog
 从2.0.0开始，SparkSession是所有API的统一入口，如果想在spark中使用hive，需要在创建实例时调用enableHiveSupport。
 
 下面是一个SparkSession对象持有的属性及子属性，缩进代表了对象之间的持有关系。
@@ -48,6 +49,7 @@ spark中，Catalog的实现一直在演进。
 
 SparkSession是private类，获取方法有两种，Builder.getOrCreate()和sparkSession.newInstance()。Builder.getOrCreate()只有在首次创建的时候才会new，后续调用只会获取首次创建的实例。在已经存在的sparkSession实例上调用newSession方法，可以获取一个新SparkSessoin实例，但是SharedState是共用的，因此HiveExternalCatalog实例也是共用的，所以Analyzer到HiveMetaStore的解析路径也是一样的。
 
+## 3、spark3.0中的Catalog
 在spark3.0.0中，Catalog的实现有较大变化，增加了CatalogPlugin接口和CatalogManager，可以有多个CatalogPlugin实现，由CatalogManager通过一个Map来管理。对象的层级关系如下：
 
 - SparkSession
@@ -83,3 +85,11 @@ V2SessionCatalog虽然是一个支持Hive的CatalogPlugin实现，但是不能�
 从上面的Catalog演进和现状来看，Hive在Spark中是一个比较特殊的组件，enableHiveSupport以及各种Hive相关的实现类，都说hive和spark是深度耦合的，至少曾经是。
 目前还不能把hive完全看作是一种CatalogPlugin，原因可能是历史原因导致修改难度大、社区可能认为没有迫切的需求等。
 
+## 4、结论
+目前原生的spark3版本，无法做到访问多个hive。
+
+那么，确实有这个需求怎么办？
+- [Waggle Dance][waggle-dance]. 提供多个hive的联邦服务。
+- 自己实现CatalogPlugin. 目前可以找到的，[Kyuubi Spark Hive connector(KSHC)][KSHC]。
+[waggle-dance]: https://github.com/ExpediaGroup/waggle-dance
+[KSHC]: [https://www.soopr.co](https://kyuubi.readthedocs.io/en/v1.10.1/connector/spark/hive.html)
