@@ -6,6 +6,7 @@ tags: [spark, hive]
 ---
 
 准确的说，问题是spark能否同时访问多个hive metastore？
+
 先说结论，原生的spark是不支持的，或者说至少在3.5.6版本是不支持的。
 但是从3.0.0开始，Spark增加了CatalogPlugin接口，支持通过CatalogManager管理多个CatalogPlugin，让spark同时访问多个hive有了理论上可能性。
 
