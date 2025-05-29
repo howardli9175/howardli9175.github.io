@@ -6,3 +6,5 @@ tags: [spark, hive]
 ---
 
 准确的说，问题是spark能否同时访问多个hive metastore？
+
+![behind_spark_sql](/images/behind_spark_sql.png)
