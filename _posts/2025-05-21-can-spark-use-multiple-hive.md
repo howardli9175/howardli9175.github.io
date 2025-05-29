@@ -82,14 +82,16 @@ V2SessionCatalog虽然是一个支持Hive的CatalogPlugin实现，但是不能�
 
 理论上是可以自己实现一个CatalogPlugin，可以通过在配置文件里指定hive相关的配置项，来达到访问多个hive的目的。
 
-从上面的Catalog演进和现状来看，Hive在Spark中是一个比较特殊的组件，enableHiveSupport以及各种Hive相关的实现类，都说hive和spark是深度耦合的，至少曾经是。
-目前还不能把hive完全看作是一种CatalogPlugin，原因可能是历史原因导致修改难度大、社区可能认为没有迫切的需求等。
+从上面的Catalog演进和现状来看，Hive在Spark中是一个比较特殊的组件，enableHiveSupport以及各种Hive相关的实现类，可以说hive和spark是深度耦合的，至少曾经是。
+目前还不能把hive完全看作是一种CatalogPlugin，猜测原因可能是历史原因导致修改难度大、社区可能认为没有迫切的需求等。
 
 ## 4、结论
 目前原生的spark3版本，无法做到访问多个hive。
 
 那么，确实有这个需求怎么办？
-- [Waggle Dance][waggle-dance]. 提供多个hive的联邦服务。
-- 自己实现CatalogPlugin. 目前可以找到的，[Kyuubi Spark Hive connector(KSHC)][KSHC]。
+- [Waggle Dance][waggle-dance]。提供多个hive的联邦服务。
+
 [waggle-dance]: https://github.com/ExpediaGroup/waggle-dance
-[KSHC]: [https://www.soopr.co](https://kyuubi.readthedocs.io/en/v1.10.1/connector/spark/hive.html)
+- 自己实现CatalogPlugin。目前可以找到的，[Kyuubi Spark Hive connector(KSHC)][kshc]。
+
+[kshc]: https://kyuubi.readthedocs.io/en/v1.10.1/connector/spark/hive.html
