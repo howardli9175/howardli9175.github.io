@@ -8,9 +8,11 @@ tags: [spark, hive]
 准确的说，问题是spark能否同时访问多个hive metastore？
 
 先说结论，原生的spark是不支持的，或者说至少在3.5.6版本是不支持的。
+
 但是从3.0.0开始，Spark增加了CatalogPlugin接口，支持通过CatalogManager管理多个CatalogPlugin，让spark同时访问多个hive有了理论上可能性。
 
 Catalog起什么作用？
+
 一个重要作用就是被Analyzer使用，把UnresolvedRelation变成ResolvedRelation，例如，当Analyzer看到一个my_db.my_table名字时，它需要清楚这个名字对应什么数据，是否存在。
 ![behind_spark_sql](/images/behind_spark_sql.png)
 
@@ -19,18 +21,19 @@ spark中，Catalog的实现一直在演进。
 从2.0.0开始，SparkSession是所有API的统一入口，如果想在spark中使用hive，需要在创建实例时调用enableHiveSupport。
 
 下面是一个SparkSession对象持有的属性及子属性，缩进代表了对象之间的持有关系。
-SparkSession
-	(源)[Hive]SharedState - a class that holds all state shared across sessions. session间共享的状态
-			(源)[Hive]ExternalCatalog - Interface for the system catalog (of tables, databases, etc). 库表清单
-					(源)HiveClient[Impl] - An externally visible interface to the Hive client. 对外暴露Hive
-							(源)Hive - Hive包中的类，用于与HiveMetaStore交互
-	(源)[Hive]SessionState - a class that holds all session-specific state in a given SparkSession. 某个session独有的状态。
-			HiveClient[Impl]
-			(源)[Hive]SessionCatalog - An internal catalog that is used by a Spark Session. SparkSession使用的Catalog
-					[Hive]ExternalCatalog - 来自HiveSharedState
-					HiveClient[Impl]
-			(源)Analyzer
-					[Hive]SessionCatalog - 来自HiveSessionState
+
+- SparkSession
+  - (源)[Hive]SharedState - a class that holds all state shared across sessions. session间共享的状态
+    - (源)[Hive]ExternalCatalog - Interface for the system catalog (of tables, databases, etc). 库表清单
+      - (源)HiveClient[Impl] - An externally visible interface to the Hive client. 对外暴露Hive
+        - (源)Hive - Hive包中的类，用于与HiveMetaStore交互
+  - (源)[Hive]SessionState - a class that holds all session-specific state in a given SparkSession. 某个session独有的状态。
+    - HiveClient[Impl]
+    - (源)[Hive]SessionCatalog - An internal catalog that is used by a Spark Session. SparkSession使用的Catalog
+      - [Hive]ExternalCatalog - 来自HiveSharedState
+      - HiveClient[Impl]
+    - (源)Analyzer
+      - [Hive]SessionCatalog - 来自HiveSessionState
 解释一下上面的层级结构：
 (源)[Hive]SharedState表示，SharedState是接口或者基类，HiveSharedState是实现类，[源]是指首次创建的地方。
 在创建SparkSession的时候，调用了enableHiveSupport方法后，SparkSession持有的SharedState就是HiveSharedState实例，SessoinState也是类似机制。
