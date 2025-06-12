@@ -19,13 +19,13 @@ tags: [hive, lock, transaction]
 [hive-1293]:https://issues.apache.org/jira/browse/HIVE-1293
 - [hive-5317 Implement insert, update, and delete in Hive with full ACID support][hive-5317]
 
-[hive-5317] : https://issues.apache.org/jira/browse/HIVE-5317
+[hive-5317]:https://issues.apache.org/jira/browse/HIVE-5317
 - [hive-5843 Transaction manager for Hive][hive-5843]
 
-[hive-5843] : https://issues.apache.org/jira/browse/HIVE-5843
+[hive-5843]:https://issues.apache.org/jira/browse/HIVE-5843
 - [hive-22158 HMS Translation layer - Disallow non-ACID MANAGED tables.][hive-22158]
 
-[hive-22158] : https://issues.apache.org/jira/browse/HIVE-22158
+[hive-22158]:https://issues.apache.org/jira/browse/HIVE-22158
 
 hive-0.7.0之前，hive中的并发只能保证，不会读取到新旧版本混合的数据。
 
