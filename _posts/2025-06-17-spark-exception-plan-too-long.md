@@ -21,9 +21,9 @@ java.lang.StringIndexOutOfBoundsException: String index out of range: -47
 - [spark-31916 StringConcat can overflow `length`, leads to StringIndexOutOfBoundsException][spark-31916]
 - [spark-32157 Integer overflow when constructing large query plan string][spark-32157]
 
-结论，这个问题影响的版本是3.0.0及以下，从3.0.1开始已修复。
+结论，执行计划太大，导致int型的溢出。这个问题影响的版本是3.0.0及以下，从3.0.1开始已修复。
 
-再记录一下源代码的bug是如何产生，因为自己在初始分析过程中，没看到出为何会产生bug。
+再记录一下源代码的bug是如何产生，因为自己在初始分析过程中，没看出为何会产生bug。
 ```
   class StringConcat(val maxLength: Int = ByteArrayMethods.MAX_ROUNDED_ARRAY_LENGTH) {
     protected val strings = new ArrayBuffer[String]
