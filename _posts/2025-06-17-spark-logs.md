@@ -55,11 +55,21 @@ yarn.log-aggregation.reatin-seconds=7 days
                                                     |- dn-0002.example.com_8041/
                                                     |- ....
 ```
-remote-app-log-dir指定的目录下，先是用户子目录(foo)，接着是文件格式子目录(logs-ifile)，接着是app-id子目录，接着是container子目录，最后是具体的日志文件。
+remote-app-log-dir指定的目录下，先是用户子目录(foo)，接着是文件格式子目录(logs-ifile)，接着是app-id子目录，最后是每个NM对应一个文件，其中包含NM上所有container的日志。
 
 我们尝试一下cat命令看一下聚合后的日志文件，发现是乱码。用yarn logs命令查看聚合后的日志。
 ```
-yarn logs 
+# 查看app-id下涉及哪些节点
+yarn logs -applicationId application_174042693165_457469 -list_nodes
+
+# 查看app-id涉及的所有节点的所有container 
+yarn logs -applicationId application_174042693165_457469 -show_application_log_info
+
+# 查看app-id涉及的所有节点的所有container涉及的所有日志文件
+yarn logs -applicationId application_174042693165_457469 -show_container_log_info
+
+# 展示app-id的某个container下所有的日志内容
+yarn logs -applicationId application_174042693165_457469 -log_files_pattern ALL -containerId container_e262_174042693165_457469_01_000069
 ```
 
 默认情况下，spark任务的日志运行时存放在NM本地，任务完成后，归集到hdfs，并保留一期限。这个机制满足绝大多数场景。
@@ -67,10 +77,10 @@ yarn logs
 ### yarn-client模式下，driver不受yarn管理，那么在任务完成后，driver日志就找不到了？
 在spark3.0.0之前，只能靠用户自己保存driver日志。从spark3.0.0开始，增加了如下参数：
 ```
-spark.driver.log.persistToDfs.enabled
-spark.driver.log.dfsDir
+spark.driver.log.persistToDfs.enabled=true
+spark.driver.log.dfsDir=/user/spark3/driverLogs
 ```
-当spark.driver.log.persistToDfs.enabled=true并且client模式时，会在client节点本地创建一个日志文件，并且为driver进程的RootLogger增加一个FileAppender。并且当任务完成后，还会将日志文件同步到spark.driver.log.dfsDir远程目录。
+client模式下，spark.driver.log.persistToDfs.enabled=true并且spark.driver.log.dfsDir有值，会在client节点本地创建一个日志文件，同时为driver进程的RootLogger增加一个FileAppender，指向该日志文件。当任务开始后，client本地日志文件就会同步到spark.driver.log.dfsDir指向的远程目录。
 
 ### spark-streaming任务
 实时任务产生的日志是一直增加的，并且当日志级别设置不当或者打印日志过多时，放在NM本地的日志文件会增长的很快，理论上总有一天会占满节点的磁盘。
@@ -104,5 +114,5 @@ appender.rolling.strategy.max = 10
 --conf "spark.driver.extraJavaOptions=-Dlog4j.configurationFile=file:log4j2.properties"
 --conf "spark.executor.extraJavaOptions=-Dlog4j.configurationFile=file:log4j2.properties"
 ```
-需要注意的，要使用cluster模式提交实时任务。
+需要注意的，要使用cluster模式提交实时任务。client模式开启了driver日志持久化的情况下，driver日志会同时输出到标准错误流和日志文件，重要的是，我们无法控制日志文件的滚动模式，会造成日志文件不断增长。 
 
